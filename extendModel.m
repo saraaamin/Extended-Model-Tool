@@ -1,6 +1,7 @@
 function extendModel(mainModel)
 global substrateIDs
 global prodIDsList
+global formulaList
 
 originalModel = mainModel;
 originalEColiKeggID = mainModel.EcoliKEGGIDs;
@@ -18,6 +19,7 @@ unknownProdIDs = [];
 unknownFormulasList = [];
 substrateIDs = [];
 prodIDsList = [];
+formulaList = [];
 enzymeOperatorIdx = [];
 prodEnzymesList = [];
 stepsFBAResults = [];
@@ -31,7 +33,7 @@ load(operatorsFileName)
 load ecoli_concentration_data.mat
 load cofactors.mat
 % load ProductsDetails.mat
-compoundsToApplyOpsOn = uniqueEColiKeggID;
+% compoundsToApplyOpsOn = uniqueEColiKeggID;
 compoundsToApplyOpsOn = [3; 6; 9; 19; 22; 24; 25; 26; 29; 31; 37; 41;...
     42; 43; 47; 49; 51; 53; 54; 58; 59; 62; 64; 65; 73; 74; 78; 79; 82;...
     85; 91; 92; 100; 106; 108; 111; 118; 119; 122; 127; 135; 141; 147;...
@@ -41,13 +43,28 @@ compoundsToApplyOpsOn = [3; 6; 9; 19; 22; 24; 25; 26; 29; 31; 37; 41;...
     860; 1236; 1602; 2504; 2631; 3175; 3722; 3736; 3794; 4256; 4376; 4411;...
     4677; 4823; 4874; 5382; 5754; 5809; 6022; 17556; 17569];
 
+% this is a list of low concentration metabolites that we generate
+% operators for
+% compoundsToApplyOpsOn = [3393; 5262; 5264; 5266; 95; 84; 5753; 944; 5276;...
+%     4734; 143; 44; 283; 624; 33; 251; 5275; 4302; 217; 311; 1146; 75; 13;...
+%     5747; 1271; 5757; 692; 363; 463; 130; 5268; 212; 330];
+
+
+% this is the list of compounds predicted by proximal when applying
+% operators on substrates in E.coli. We will use them to apply operators on
+% them for a second time.
+% compoundsToApplyOpsOn = [14; 301; 346; 399; 474; 597; 623; 872; 900; 1180;...
+%     1182; 1300; 1353; 1424; 2218; 2426; 2476; 2532; 2642; 2714; 2810; 2896;...
+%     3267; 3277; 3344; 4039; 4051; 4115; 4181; 4322; 5711; 5847; 6473; 9332;...
+%     15556; 15999; 17568; 20231];
+
 %     compound IDs that don't have matches in KEGG or compounds consist of
 %     one atoms with no bounds. Those compounds are skipped since no
 %     products can be generated from them
 %     the last set of IDs are carrier proteins that should be excluded
 %     since they contain S and R groups which can't be balanced as they are
 %     not detailed.
-    excludedIDs = [-1; 0; 1; 10; 23; 34; 38; 70; 76; 80; 84; 87; 175; 238; 282; 283; 291; 305; 698; 703; 787; 824; 1330; 1342; 1413; 1528; 1635;...
+    excludedIDs = [-1; 0; 1; 10; 14; 23; 34; 38; 70; 76; 80; 84; 87; 175; 238; 282; 283; 291; 305; 698; 703; 787; 824; 1330; 1342; 1413; 1528; 1635;...
         1636; 1637; 1638; 1639; 1640; 1641; 1642; 1643; 1644; 1645; 1646; 1647; 1648; 1649; 1650; 1651; 1652; 1653; 1834; 2386; 2745; 2869;...
         5737; 6710; 7292; 14818; 14819; 15233; 19610;...
         173; 4180; 4619; 4620; 4688; 5223; 5274];
@@ -61,7 +78,10 @@ for compoundIdx = 1:length(compoundsToApplyOpsOn)
 
     % this condition is to check if the compound has concentration less
     % than 10^-6 then it will be ignored
-    if isempty(find(filteredMets_KEGGIDs == compound)) || ~isempty(find(excludedIDs == compound))
+    %comment this out since we have a set of metabolites with concentration
+    %between 10^-6 and 10^-7
+    %     if isempty(find(filteredMets_KEGGIDs == compound)) || ~isempty(find(excludedIDs == compound))
+    if ~isempty(find(excludedIDs == compound))
         continue;
     end
     
@@ -142,6 +162,9 @@ for compoundIdx = 1:length(compoundsToApplyOpsOn)
                             if isempty(find(prodCmpID == cids))
                                 cids(cidCount,1) = prodCmpID;
                                 cidNames{cidCount,1} = pubChemName;
+                                prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
+                                prodFormula = char(py.str(prodFormula));
+                                formulaList = [formulaList, prodFormula];
                                 
                                 % keeping track of compounds and products without
                                 % adding them to the model
@@ -152,45 +175,66 @@ for compoundIdx = 1:length(compoundsToApplyOpsOn)
                                 prodCounter = prodCounter + 1;
                             end
                         else
-                            continue;
-%                             prodCmpID = newProdID;
-%                             prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
-%                             prodFormula = char(py.str(prodFormula));
-%                             unknownProdIDs(end+1,1) = prodCmpID;
-%                             unknownFormulasList{end+1, 1} = prodFormula;
-%                             newProdID = newProdID - 1;
-%                             
-%                             % keeping track of compounds and products without
-%                             % adding them to the model
-%                             substrateIDs = [substrateIDs; compound];
-%                             prodIDsList = [prodIDsList; prodCmpID];
+%                             continue;
+                            prodCmpID = newProdID;
+                            prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
+                            prodFormula = char(py.str(prodFormula));
+                            unknownProdIDs(end+1,1) = prodCmpID;
+                            unknownFormulasList{end+1, 1} = prodFormula;
+                            newProdID = newProdID - 1;
+                            
+                            % keeping track of compounds and products without
+                            % adding them to the model
+                            substrateIDs = [substrateIDs; compound];
+                            prodIDsList = [prodIDsList; prodCmpID];
+                            % saving the mol file in a different directory for
+                            % later consideration
+                            newNameProdFile = [currentProdFile(1:8), num2str(compound), num2str(prodCmpID), '.mol'];
+                            sourceFolder = [productsFolder, currentProdFile];
+                            destinationFolder = [savedProductsFolder, newNameProdFile];
+                            movefile(sourceFolder, destinationFolder);
+
                         end
                     else
-                        continue;
-%                         prodCmpID = newProdID;
-%                         prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
-%                         prodFormula = char(py.str(prodFormula));
-%                         unknownProdIDs(end+1,1) = prodCmpID;
-%                         unknownFormulasList{end+1, 1} = prodFormula;
-%                         newProdID = newProdID - 1;
-%                         % keeping track of compounds and products without
-%                         % adding them to the model
-%                         substrateIDs = [substrateIDs; compound];
-%                         prodIDsList = [prodIDsList; prodCmpID];
+%                         continue;
+                        prodCmpID = newProdID;
+                        prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
+                        prodFormula = char(py.str(prodFormula));
+                        unknownProdIDs(end+1,1) = prodCmpID;
+                        unknownFormulasList{end+1, 1} = prodFormula;
+                        newProdID = newProdID - 1;
+                        % keeping track of compounds and products without
+                        % adding them to the model
+                        substrateIDs = [substrateIDs; compound];
+                        prodIDsList = [prodIDsList; prodCmpID];
+                        % saving the mol file in a different directory for
+                        % later consideration
+                        newNameProdFile = [currentProdFile(1:end-4), '-', num2str(compound), num2str(prodCmpID), '.mol'];
+                        sourceFolder = [productsFolder, currentProdFile];
+                        destinationFolder = [savedProductsFolder, newNameProdFile];
+                        movefile(sourceFolder, destinationFolder);
+
                     end
                    
                 else
-                    continue;
-%                     prodCmpID = newProdID;
-%                     prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
-%                     prodFormula = char(py.str(prodFormula));
-%                     unknownProdIDs(end+1,1) = prodCmpID;
-%                     unknownFormulasList{end+1, 1} = prodFormula;
-%                     newProdID = newProdID - 1;
-%                     % keeping track of compounds and products without
-%                     % adding them to the model
-%                     substrateIDs = [substrateIDs; compound];
-%                     prodIDsList = [prodIDsList; prodCmpID];
+%                     continue;
+                    prodCmpID = newProdID;
+                    prodFormula = py.OpenBabelFilesConversion.convert_mol_to_formula(currentProdFile);
+                    prodFormula = char(py.str(prodFormula));
+                    unknownProdIDs(end+1,1) = prodCmpID;
+                    unknownFormulasList{end+1, 1} = prodFormula;
+                    newProdID = newProdID - 1;
+                    % keeping track of compounds and products without
+                    % adding them to the model
+                    substrateIDs = [substrateIDs; compound];
+                    prodIDsList = [prodIDsList; prodCmpID];
+                    % saving the mol file in a different directory for
+                    % later consideration
+                    newNameProdFile = [currentProdFile(1:end-4), '-', num2str(compound), num2str(prodCmpID), '.mol'];
+                    sourceFolder = [productsFolder, currentProdFile];
+                    destinationFolder = [savedProductsFolder, newNameProdFile];
+                    movefile(sourceFolder, destinationFolder);
+
                 end
                 
             end  
@@ -385,5 +429,5 @@ for compoundIdx = 1:length(compoundsToApplyOpsOn)
     end
 end
 
-save ProductsDetails_short.mat prodIDsList substrateIDs enzymeOperatorIdx prodEnzymesList
+save ProductsDetails_withunknown.mat prodIDsList substrateIDs formulaList enzymeOperatorIdx prodEnzymesList unknownProdIDs unknownFormulasList
 end
