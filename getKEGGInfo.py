@@ -1,6 +1,6 @@
+# from bioservices import *
 from Bio import KEGG
 from Bio.KEGG import REST
-from bioservices import *
 import re
 
 def get_metabolite_ID(metName):
@@ -77,44 +77,44 @@ def map_EC_to_org(org):
             writeFile.write(line)
     writeFile.close()    
    
-# def get_EC_num(geneName):
+def get_EC_num(geneName):
 	
-    # # retrieve gene data from KEGG
-    # keggData = REST.kegg_find('genes', geneName).read()
-    # keggData = "".join(keggData)
-    # keggData = keggData.lower()
-    # keggData = keggData.splitlines()
+    # retrieve gene data from KEGG
+    keggData = REST.kegg_find('genes', geneName).read()
+    keggData = "".join(keggData)
+    keggData = keggData.lower()
+    keggData = keggData.splitlines()
     
-    # # find which line 'eco' exists in the returned values to get enzyme name
-    # enzymeNameLine = ''
-    # for line in keggData:
-        # if line.find('eco:') != -1:
-            # enzymeNameLine = line
-            # break
+    # find which line 'eco' exists in the returned values to get enzyme name
+    enzymeNameLine = ''
+    for line in keggData:
+        if line.find('eco:') != -1:
+            enzymeNameLine = line
+            break
     
-    # if enzymeNameLine == '':
-        # return ''
-    # else:    
-        # enzymeName = enzymeNameLine[enzymeNameLine.index('\t')+1: enzymeNameLine.index(';')]        
+    if enzymeNameLine == '':
+        return ''
+    else:    
+        enzymeName = enzymeNameLine[enzymeNameLine.index('\t')+1: enzymeNameLine.index(';')]        
     
-    # # find enzyme name in KEGG and get ECNums associated to it
-    # keggData = REST.kegg_find('enzyme', enzymeName).read()
-    # keggData = "".join(keggData)
-    # keggData = keggData.lower()
-    # keggData = keggData.splitlines()
+    # find enzyme name in KEGG and get ECNums associated to it
+    keggData = REST.kegg_find('enzyme', enzymeName).read()
+    keggData = "".join(keggData)
+    keggData = keggData.lower()
+    keggData = keggData.splitlines()
     
-    # ecNumList = []
-    # for line in keggData:
-        # try:
-            # ecNumList.append(line[line.index(':')+1 : line.index('\t')])
-        # except ValueError:
-            # return ''
+    ecNumList = []
+    for line in keggData:
+        try:
+            ecNumList.append(line[line.index(':')+1 : line.index('\t')])
+        except ValueError:
+            return ''
 
-    # if ecNumList == []:
-        # return ''
-    # else:
-        # ecNumList = ','.join(ecNumList)
-        # return ecNumList
+    if ecNumList == []:
+        return ''
+    else:
+        ecNumList = ','.join(ecNumList)
+        return ecNumList
     
  
 def get_inchiKey(keggID): 
@@ -136,11 +136,13 @@ def get_inchiKey(keggID):
     # print chebi_entry.inchi
     
 if __name__ == '__main__':
-    # keggID = get_metabolite_ID('D-Glycerate 2-phosphate')
+    metName = ['4-Phospho-D-erythronate', '(S)-3-Hydroxydodecanoyl-CoA', '(S)-3-Hydroxydecanoyl-CoA', '(S)-3-Hydroxyoctanoyl-CoA', 'D-Fructose', 'Acetaldehyde', '3-Oxodecanoyl-[acyl-carrier protein]', '3-Dehydroquinate', 'trans-Dodec-2-enoyl-CoA', 'trans-Oct-2-enoyl-CoA', '5-Formamido-1-(5-phospho-D-ribosyl)imidazole-4-carboxamide', 'Succinyl-CoA', '5,10-Methylenetetrahydrofolate', 'GTP', '1-dodecanoyl-sn-glycerol 3-phosphate', 'Hydrogen sulfide', 'L-Proline', '5-phosphoribosyl-5-carboxyaminoimidazole', 'Dodecanoyl-CoA (n-C12:0CoA)', 'Octanoyl-CoA (n-C8:0CoA)', 'N-Acetyl-L-glutamate', 'Sodium', 'Acetate', '(R)-3-hydroxy-cis-palm-9-eoyl-[acyl-carrier protein]', '(R)-3-hydroxy-cis-dodec-5-enoyl-[acyl-carrier protein]', 'R-3-hydroxypalmitoyl-[acyl-carrier protein]', 'chorismate', 'L-Arginine', 'trans-Dec-2-enoyl-CoA', '1-hexadecanoyl-sn-glycerol 3-phosphate', 'N-(5-Phospho-D-ribosyl)anthranilate', 'ADP-D-glycero-D-manno-heptose', 'D-Glutamate', 'ADP-L-glycero-D-manno-heptose', 'Isocitrate', 'D-Glucosamine 6-phosphate', '2-Hydroxy-3-oxopropanoate', 'UTP', 'Acetyl phosphate', 'Diphosphate', 'Ornithine', 'Succinate', '(R)-3-Hydroxyhexanoyl-[acyl-carrier protein]', '(3R)-3-Hydroxyacyl-[acyl-carrier protein]', '(R)-3-Hydroxydodecanoyl-[acyl-carrier protein]', '(R)-3-hydroxy-cis-myristol-7-eoyl-[acyl-carrier protein]', 'UDP-N-acetylmuramoyl-L-alanyl-D-glutamate', 'dTDP', 'Indole', 'IMP', '(S)-3-Hydroxyhexanoyl-CoA', 'Adenosine', 'Deoxyguanosine']
+    for met in metName:
+        keggID = get_metabolite_ID(met)
     # keggID = get_EC_num('s0001')
-    # print keggID
+        print keggID
     
-    # inchikey = get_inchiKey('C01571')
+    # inchikey = get_inchiKey('C00001')
     # print inchikey
     
-    map_EC_to_org('ECO')
+    # map_EC_to_org('ECO')
