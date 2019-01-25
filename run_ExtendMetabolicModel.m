@@ -1,4 +1,4 @@
-% As an input later the uder can define the model to be extended
+% As an input later the user can define the model to be extended
 % As a requirement:
 %   - should provide the data files mapping compounds and reactions in KEGG
 
@@ -28,7 +28,7 @@ load Ecoli_iML1515.mat
 % mainModel = updateModelDetails(mainModel);
 
 % Get unique enzymes from the model
-enzymeList = getEnzymeList(mainModel);
+% enzymeList = getEnzymeList(mainModel);
 
 % for user given models use the EC numbers associated with genes in the 
 % model to get the operators mapped to them
