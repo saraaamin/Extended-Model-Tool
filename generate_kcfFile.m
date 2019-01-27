@@ -6,6 +6,7 @@ if isempty(findstr(molFile, '.mol'))
 else
     command = ['curl -F molfile=@', molFile, ' -s http://rest.genome.jp/mol2kcf/'];
 end
+
 [status, cmdout] = system(command);
 if status ~= 0
     fprintf('Error running curl \n');
