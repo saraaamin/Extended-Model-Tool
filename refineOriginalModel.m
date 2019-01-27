@@ -6,9 +6,6 @@ function newModel = refineOriginalModel(mainModel)
 % Get min and max flux of all reactions in the model
 [minFlux, maxFlux] = fluxVariability(mainModel);
 
-% minFlux = mainModel.minFlux;
-% maxFlux = mainModel.maxFlux;
-
 newModel = mainModel;
 rxnsNum = length(minFlux);
 

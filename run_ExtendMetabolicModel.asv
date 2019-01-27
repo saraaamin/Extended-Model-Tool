@@ -4,7 +4,7 @@
 
 function run_ExtendMetabolicModel()
 % initCobraToolbox()
-% initializing global variables to be used throught the code
+
 global reactions
 global reactionData
 global indexReactions
