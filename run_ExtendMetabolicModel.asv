@@ -4,7 +4,7 @@
 
 function run_ExtendMetabolicModel()
 % initCobraToolbox()
-
+% initializing global variables to be used throught the code
 global reactions
 global reactionData
 global indexReactions
@@ -38,12 +38,13 @@ load Ecoli_iML1515.mat
 extendModel(mainModel)
 end
 
+
 function selectedOperators = getOperators(enzymesList)
 global operators
 global operatorsMainAtom
 global operatorsMainAtomPos
 
-% load the Operators Neda generated from KEGG
+% load the Operators  generated from KEGG
 % load KEGGOperators_2016_08_14.mat
 % load KEGGOperators_2016_08_14_update.mat
 load operators.mat

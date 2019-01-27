@@ -38,25 +38,22 @@ load Ecoli_iML1515.mat
 extendModel(mainModel)
 end
 
+% This function retrieves the set of operators mapped to the EC numbers
+% associated with the desired metabolic model
 function selectedOperators = getOperators(enzymesList)
 global operators
 global operatorsMainAtom
 global operatorsMainAtomPos
 
-% load the Operators Neda generated from KEGG
-% load KEGGOperators_2016_08_14.mat
-% load KEGGOperators_2016_08_14_update.mat
+% load full Operators table generated from KEGG
 load operators.mat
 
-enzymeNum = length(enzymesList);
-
-% for each enzyme, get the list of enzymes catalyzing the reactions
-selectedOperators = struct();
 % each enzyme in the enzymesList, get the list of operators associated
-% to it from the allOperators dataset
+% with it from the allOperators dataset
+enzymeNum = length(enzymesList);
+selectedOperators = struct();
+
 for enzymeIdx = 1:enzymeNum
-    enzymeIdx
-%     selectedOperators = getEnzymeOperators(enzymesList{enzymeIdx}, rxnKEGGIDList(enzymeIdx), selectedOperators);
     selectedOperators = getEnzymeOperators(enzymesList{enzymeIdx}, selectedOperators);
 end
 
@@ -64,8 +61,6 @@ selectedOperators = getUniqueOperators(selectedOperators);
 
 [selectedOperators, operatorsMainAtom, operatorsMainAtomPos] = sortRs(selectedOperators);
 save SelectedOperators selectedOperators operatorsMainAtom operatorsMainAtomPos
-
-
 end
 
 % This is a function that returns the operators associated with a specific
@@ -93,30 +88,24 @@ else
 end
 
 % get the operators of the EC number passed to the function from the
-% operators dataset, and operator has to include the enzyme and the
-% reaction number to be selected. Some operators don't include all the
-% reactions related to them in Kegg
-% for enzymeIdx = 1:length(enzymeList)
-    for operatorIdx = 1:operatorsNum
-%         enzymeMatch = find(strcmp(enzymeList{enzymeIdx}, operators(operatorIdx).Enzyme));
-        enzymeMatch = find(strcmp(enzymeList, operators(operatorIdx).Enzyme));
-%         rxnMatch = find(operators(operatorIdx).Reaction == rxnID);
-        
-        if ~isempty(enzymeMatch) %&& ~isempty(rxnMatch)
-            selectedOperatorsNum = selectedOperatorsNum+1;
-            selectedOperators(selectedOperatorsNum).ID = operators(operatorIdx).ID;
-            selectedOperators(selectedOperatorsNum).Reaction = operators(operatorIdx).Reaction;
-            selectedOperators(selectedOperatorsNum).Enzyme = operators(operatorIdx).Enzyme;
-            selectedOperators(selectedOperatorsNum).Reactant = operators(operatorIdx).Reactant;
-            selectedOperators(selectedOperatorsNum).Product = operators(operatorIdx).Product;
-            selectedOperators(selectedOperatorsNum).KCF = operators(operatorIdx).KCF;
-            
-            selectedOperators(selectedOperatorsNum).subKEGGID = operators(operatorIdx).SubstrateID;
-            selectedOperators(selectedOperatorsNum).prodKEGGID = operators(operatorIdx).ProductID;
-%             selectedOperators(selectedOperatorsNum).CoupledRxn = rxnID;   
-        end
+% operators dataset, and operator has to include the enzyme number to be
+% selected. 
+for operatorIdx = 1:operatorsNum
+    enzymeMatch = find(strcmp(enzymeList, operators(operatorIdx).Enzyme));
+
+    if ~isempty(enzymeMatch)
+        selectedOperatorsNum = selectedOperatorsNum+1;
+        selectedOperators(selectedOperatorsNum).ID = operators(operatorIdx).ID;
+        selectedOperators(selectedOperatorsNum).Reaction = operators(operatorIdx).Reaction;
+        selectedOperators(selectedOperatorsNum).Enzyme = operators(operatorIdx).Enzyme;
+        selectedOperators(selectedOperatorsNum).Reactant = operators(operatorIdx).Reactant;
+        selectedOperators(selectedOperatorsNum).Product = operators(operatorIdx).Product;
+        selectedOperators(selectedOperatorsNum).KCF = operators(operatorIdx).KCF;
+
+        selectedOperators(selectedOperatorsNum).subKEGGID = operators(operatorIdx).SubstrateID;
+        selectedOperators(selectedOperatorsNum).prodKEGGID = operators(operatorIdx).ProductID;
     end
-% end
+end
 end
 
 function [phaseI, phaseImainAtom, phaseImainAtomPos] = sortRs(cypData)
