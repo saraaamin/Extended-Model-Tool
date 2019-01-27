@@ -1,11 +1,9 @@
-% This function retrieves a unique list of EC numbers saved in the model
+
 function enzymeList = getEnzymeList(mainModel)
 
 genesNum = length(mainModel.genes);
 count = 1;
 
-% if a gene is associated with more than one EC number, split those EC
-% numbers in separate entities
 for i = 1:genesNum
     if ~isempty(mainModel.ECNums{i})
          ecStr = strsplit(char(mainModel.ECNums{i}),';');
@@ -22,7 +20,5 @@ for i = 1:genesNum
          end
     end
 end
-
-% Remove duplicated EC numbers 
 enzymeList = unique(ecList);
 end
