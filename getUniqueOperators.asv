@@ -26,14 +26,15 @@ for i = 1:length(all_operators)
     % if the length of RPairs IDs are equal then there is a chance that the
     % current operator and the query operator are the same
     if length(all_operators(i).ID) == length(queryOperator.ID)
-        
         % if both IDs are equal, check if other fields are equal
         if isempty(find((all_operators(i).ID == queryOperator.ID) == 0))
-            if isempty(find((all_operators(i).subKEGGID == queryOperator.subKEGGID) == 0))
-                if isempty(find((all_operators(i).prodKEGGID == queryOperator.prodKEGGID) == 0))
-                    similarIDx = i;
-                    return;
-                end
+%             if all_operators(i).CoupledRxn == queryOperator.CoupledRxn
+                if isempty(find((all_operators(i).subKEGGID == queryOperator.subKEGGID) == 0))
+                    if isempty(find((all_operators(i).prodKEGGID == queryOperator.prodKEGGID) == 0))
+                        similarIDx = i;
+                        return;
+                    end
+%                 end
             end
         end
     end            
