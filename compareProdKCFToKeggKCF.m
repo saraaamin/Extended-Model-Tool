@@ -1,5 +1,8 @@
-
+% This is a function that compares a molecule KCF file to all KCF files on
+% KEGG. An offline copy of the KEGG's compounds database should be
+% available
 function prodCmpID = compareProdKCFToKeggKCF(prodKCFFile)
+% directory where the KEGG compounds are
 KEGGKcfFolder = '.\KEGGData\compound\compound\kcf\';
 KEGGKcfFolderFiles = dir(KEGGKcfFolder);
        
