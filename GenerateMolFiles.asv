@@ -420,7 +420,6 @@ if ~isempty(pattern.Product.D1.D) && ~isempty(pattern.Product.D1.atom)
                         elseif isequal(sort(iStruct.Atoms(neighborsM2, 2)'), sort(pattern.Reactant.M1N))
                             connectToM = RMList(3);
                         end
-                        
                     elseif length(pattern.Reactant.M2N) < length(pattern.Product.M2N)
                         
                         % M2 is connected to O2x
@@ -489,6 +488,11 @@ M(1:size(kcf.M, 1)) = kcf.M(:, 2);
 
 for i = 1:4
     if M(i) > 0
+        % need to check if the atoms are the same (they are not sorted so we might have it in another place)
+        %         if isequal(pattern.KCF.atom1{M(i), 1}, oStruct.Atoms{RMList(n),2})
+        %             connectToM = RMList(n);
+        %             break;
+        %         end
         if (isfield(kcf, 'Product'))
             bonds = kcf.Product.Bonds;
         else
@@ -560,7 +564,6 @@ end
 function ConstructMolFile(inputStructure, filename)
 nAtoms = size(inputStructure.Atoms, 1);
 nBonds = size(inputStructure.Bonds, 1);
-
 % constructing a mol file with atoms and bonds information
 molFileText = [' \n \n \n ', num2str(nAtoms), ' ', num2str(nBonds),'  0  0  0  0  0  0  0  0999 V2000\n'];
 for atom = 1:nAtoms
