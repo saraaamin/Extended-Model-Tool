@@ -6,27 +6,27 @@ import openbabel, pybel
 import pandas as pd
 from pandas import Series, DataFrame
             
+# conver mol file to smiles using opaenBable    
 def convert_mol_to_smiles(molFilePath, molFile):
     fileLocation = os.path.dirname(os.path.realpath(__file__))
     smilesFilePath = os.path.join(".", "productsSmiles", molFile)
     
-    # conver mol file to smiles using opaenBable    
-    # molFilePath_original = molFilePath
-    
     smilesFilePath = smilesFilePath.replace('mol','smiles')
-    # smilesFilePath = smilesFilePath.replace('productsMol','productsSmiles')
     # print molFilePath
     # print smilesFilePath
     
     os.system('babel -h -i mol '+ molFilePath + ' -o smi ' + smilesFilePath)
     return smilesFilePath    
     
+
 def read_File(fileAddress):
     # read the smiles file
     f = open(fileAddress,'r')
     product_smiles = f.read().rstrip()
     return product_smiles
-    
+
+# Use a SMILES string to search PubChem for mordetails
+# such as Pubchem CID
 def search_by_SMILES(smiles):
     # search the data base
     CIDs = []
@@ -34,8 +34,6 @@ def search_by_SMILES(smiles):
     try:
         results = pcp.get_compounds(smiles, 'smiles')
         for result in results: 
-            # CIDs.append(result.cid)
-            # CIDDetails.append(pcp.Compound.from_cid(result.cid).iupac_name)
             CIDs = result.cid
             CIDDetails = pcp.Compound.from_cid(result.cid).iupac_name
             break
@@ -51,43 +49,40 @@ def search_by_SMILES(smiles):
     
     return details
 
+# Use a PubChem CID to retreive a compound's chemical formula
 def getCompoundFormula(cid):
     cidFormula = pcp.Compound.from_cid(cid).molecular_formula
     return cidFormula    
  
+# Use a PubChem CID to retreive a compound's Inchi and InchKey
 def getCompoundInchi(cid):
     cidInchi = pcp.Compound.from_cid(cid).inchi
     cidInchiKey = pcp.Compound.from_cid(cid).inchikey
     return cidInchi, cidInchiKey
 
+# Use a PubChem CID to retreive a compound's SMILES
 def getCompoundSmiles(cid):
     cidSmiles = pcp.Compound.from_cid(cid).canonical_smiles
     cidIsomericsmiles = pcp.Compound.from_cid(cid).isomeric_smiles
     return cidSmiles, cidIsomericsmiles
-    
+
+# Use a metabolite's name to retreive its PubChem ID
 def getCompoundsPubChemID(metName):
     compound = pcp.get_compounds(metName, 'name')
     for cmp in compound:
         return str(cmp.cid)
             
-    
+            
+
+# Use an InchiKey to retreive PubChem ID
 def getPubchemIDFromInchiKey(inchikey):
     compound = pcp.get_compounds(inchikey, 'inchikey')    
     for cmp in compound:
         return cmp.cid
         
     
-def main_function(molFile):
-    fileLocation = os.path.dirname(os.path.realpath(__file__))
-    molFilePath = os.path.join(".", "productsMol", molFile)
-
-    matches = {}
-    path_to_smilesFile = convert_mol_to_smiles(molFilePath, molFile)
-    product_smiles = read_File(path_to_smilesFile)
-    CIDDetails = search_by_SMILES(product_smiles)
     
-    return CIDDetails 
-
+# Use a mole structure of a molecule to get its chemical formula
 def convert_mol_to_formula(molFile):
     fileLocation = os.path.dirname(os.path.realpath(__file__))
     molFilePath = os.path.join(".", "productsMol", molFile)
@@ -99,6 +94,7 @@ def convert_mol_to_formula(molFile):
         return ''
     return molObj.formula
 
+    
 # This function is to read a list of pubchem IDs from a file, get some details
 # related to those IDs and save them to a file
 def getPubChemIDsDetails():
@@ -141,9 +137,22 @@ def getInchiKeyDetails():
 
     writeFile.close()    
     
+
+    
+    
+def main_function(molFile):
+    fileLocation = os.path.dirname(os.path.realpath(__file__))
+    molFilePath = os.path.join(".", "productsMol", molFile)
+
+    matches = {}
+    path_to_smilesFile = convert_mol_to_smiles(molFilePath, molFile)
+    product_smiles = read_File(path_to_smilesFile)
+    CIDDetails = search_by_SMILES(product_smiles)
+    
+    return CIDDetails 
+
+    
 if __name__ == '__main__':
-    # fileLocation = os.path.dirname(os.path.realpath(__file__))
-    # molFilePath = os.path.join(".", "productsMol", "product_23.mol")
     molFilePath = "product_11.mol"
     CIDDetails = main_function(molFilePath)
     # print CIDDetails
