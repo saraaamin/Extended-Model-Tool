@@ -3,6 +3,7 @@ from Bio import KEGG
 from Bio.KEGG import REST
 import re
 
+# Function to retreive KEGG ID of a metabolite
 def get_metabolite_ID(metName):
 	
     keggData = REST.kegg_find('compound', metName).read()
@@ -24,11 +25,13 @@ def get_metabolite_ID(metName):
         keggID = int(keggID[1:])
     else: 
         keggID = 0
-      
-        
+    
     return keggID    
-   
+
+# Function to map a list of genes to theis EC numbers
+# for a specific orgnaism
 def map_EC_to_org(org):
+
     # open the file from KEGG containing EC numbers details
     org = org + ':'
     ecNum_genes_dict = {}
@@ -36,13 +39,14 @@ def map_EC_to_org(org):
         contents = openedFile.read()
         ecEntries = contents.split('///')
         
+        # extract all genes and associated EC numbers and save to a dictionary
         for ecEntry in ecEntries:
             ecLines = ecEntry.splitlines()
             if ecLines[0] == '':
                 ecLines.pop(0)
-            print ('line', ecLines[0])
             ecNum = re.search('(\d+.\d+.\d+.\d+)', ecLines[0]).group(0)
             genes = []
+
             for i in range(1, len(ecLines)):
                 if ecLines[i].find(org) != -1:
                     genesItems = ecLines[i].split()
@@ -65,6 +69,7 @@ def map_EC_to_org(org):
     writeFile = open('iM1515_genes_EC.csv', 'wb')
     writeFile.truncate()
     
+    # extract gene-EC numbers mapping for only genes in iML1515 model
     with open('iM1515 gene.txt', 'r') as openedFile:
         contents = openedFile.read().splitlines()
         for gene in contents:
@@ -76,7 +81,8 @@ def map_EC_to_org(org):
                 
             writeFile.write(line)
     writeFile.close()    
-   
+
+
 def get_EC_num(geneName):
 	
     # retrieve gene data from KEGG
@@ -120,9 +126,7 @@ def get_EC_num(geneName):
 def get_inchiKey(keggID): 
 
     kegg_con = KEGG()
-
     kegg_entry = kegg_con.parse(kegg_con.get(keggID))
-
     chebi_con = ChEBI()
 
     try:
@@ -131,15 +135,12 @@ def get_inchiKey(keggID):
         return chebi_entry.inchiKey
     except:
         return '0'
+
         
-    # print chebi_entry.smiles
-    # print chebi_entry.inchi
-    
 if __name__ == '__main__':
     metName = ['4-Phospho-D-erythronate', '(S)-3-Hydroxydodecanoyl-CoA', '(S)-3-Hydroxydecanoyl-CoA', '(S)-3-Hydroxyoctanoyl-CoA', 'D-Fructose', 'Acetaldehyde', '3-Oxodecanoyl-[acyl-carrier protein]', '3-Dehydroquinate', 'trans-Dodec-2-enoyl-CoA', 'trans-Oct-2-enoyl-CoA', '5-Formamido-1-(5-phospho-D-ribosyl)imidazole-4-carboxamide', 'Succinyl-CoA', '5,10-Methylenetetrahydrofolate', 'GTP', '1-dodecanoyl-sn-glycerol 3-phosphate', 'Hydrogen sulfide', 'L-Proline', '5-phosphoribosyl-5-carboxyaminoimidazole', 'Dodecanoyl-CoA (n-C12:0CoA)', 'Octanoyl-CoA (n-C8:0CoA)', 'N-Acetyl-L-glutamate', 'Sodium', 'Acetate', '(R)-3-hydroxy-cis-palm-9-eoyl-[acyl-carrier protein]', '(R)-3-hydroxy-cis-dodec-5-enoyl-[acyl-carrier protein]', 'R-3-hydroxypalmitoyl-[acyl-carrier protein]', 'chorismate', 'L-Arginine', 'trans-Dec-2-enoyl-CoA', '1-hexadecanoyl-sn-glycerol 3-phosphate', 'N-(5-Phospho-D-ribosyl)anthranilate', 'ADP-D-glycero-D-manno-heptose', 'D-Glutamate', 'ADP-L-glycero-D-manno-heptose', 'Isocitrate', 'D-Glucosamine 6-phosphate', '2-Hydroxy-3-oxopropanoate', 'UTP', 'Acetyl phosphate', 'Diphosphate', 'Ornithine', 'Succinate', '(R)-3-Hydroxyhexanoyl-[acyl-carrier protein]', '(3R)-3-Hydroxyacyl-[acyl-carrier protein]', '(R)-3-Hydroxydodecanoyl-[acyl-carrier protein]', '(R)-3-hydroxy-cis-myristol-7-eoyl-[acyl-carrier protein]', 'UDP-N-acetylmuramoyl-L-alanyl-D-glutamate', 'dTDP', 'Indole', 'IMP', '(S)-3-Hydroxyhexanoyl-CoA', 'Adenosine', 'Deoxyguanosine']
     for met in metName:
         keggID = get_metabolite_ID(met)
-    # keggID = get_EC_num('s0001')
         print keggID
     
     # inchikey = get_inchiKey('C00001')
